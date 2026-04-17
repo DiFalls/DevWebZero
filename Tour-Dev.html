@@ -1,0 +1,2144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jornada Dev — Criação de Sites do Zero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700&family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:    #0c0a08;
+  --paper:  #faf8f3;
+  --warm:   #f3ede0;
+  --warmer: #ece4d0;
+  --ember:  #d4501a;
+  --ember-l:#f26530;
+  --gold:   #e8980a;
+  --sky:    #1a3a5c;
+  --mint:   #157a56;
+  --muted:  #7a7060;
+  --border: #ddd5c0;
+  --border-l:#ede5d2;
+  --r:      10px;
+  --fh: 'Fraunces', Georgia, serif;
+  --fs: 'Syne', sans-serif;
+  --fb: 'DM Sans', sans-serif;
+  --fhand: 'Caveat', cursive;
+  --ease: cubic-bezier(.22,.68,0,1.2);
+  --ease-in: cubic-bezier(.4,0,.2,1);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+
+body{
+  font-family:var(--fb);
+  background:var(--paper);
+  color:var(--ink);
+  overflow-x:hidden;
+  line-height:1.6;
+}
+
+/* ── GRAIN OVERLAY ──────────────────────── */
+body::after{
+  content:'';
+  position:fixed;inset:0;
+  pointer-events:none;z-index:99998;
+  opacity:.028;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:200px 200px;
+  mix-blend-mode:multiply;
+}
+
+/* ── WELCOME MODAL ──────────────────────── */
+#welcome{
+  position:fixed;inset:0;z-index:9900;
+  background:var(--ink);
+  display:flex;align-items:center;justify-content:center;
+  padding:1.5rem;
+  transition:opacity .4s,visibility .4s;
+}
+#welcome.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.welcome-inner{
+  max-width:460px;width:100%;
+  animation:rise .7s var(--ease) both;
+}
+@keyframes rise{from{opacity:0;transform:translateY(48px) scale(.95)}to{opacity:1;transform:none}}
+.w-tag{
+  font-family:var(--fhand);font-size:2rem;
+  color:var(--gold);letter-spacing:.02em;
+  display:block;margin-bottom:.6rem;
+}
+.w-title{
+  font-family:var(--fh);font-size:clamp(2.2rem,5.5vw,3.2rem);
+  font-weight:700;color:#fff;line-height:1.08;
+  margin-bottom:1rem;
+}
+.w-title em{color:var(--ember-l);font-style:italic}
+.w-desc{color:#bdb2a8;font-size:.98rem;line-height:1.75;margin-bottom:2rem}
+.w-field{position:relative;margin-bottom:1rem}
+.w-field input{
+  width:100%;padding:15px 18px;
+  background:#1a1612;
+  border:1.5px solid #2e2a25;
+  border-radius:var(--r);
+  color:#fff;font-size:1rem;
+  font-family:var(--fb);
+  outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.w-field input::placeholder{color:#a09588}
+.w-field input:focus{border-color:var(--ember-l);box-shadow:0 0 0 3px rgba(242,101,48,.18)}
+.w-btn{
+  width:100%;padding:15px;
+  background:var(--ember);
+  color:#fff;border:none;
+  border-radius:var(--r);
+  font-family:var(--fs);font-weight:700;
+  font-size:.98rem;letter-spacing:.05em;
+  transition:background .2s,transform .15s,box-shadow .2s;
+  display:flex;align-items:center;justify-content:center;gap:.5rem;
+}
+.w-btn:hover{background:var(--ember-l);transform:translateY(-2px);box-shadow:0 8px 24px -6px rgba(212,80,26,.5)}
+.w-btn:active{transform:none;box-shadow:none}
+.w-note{text-align:center;color:#968c82;font-size:.78rem;margin-top:.75rem}
+
+/* ── TOPBAR ─────────────────────────────── */
+/* ── TOPBAR (VERSÃO DESTACADA) ─────────────── */
+#topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  display: none;
+  flex-direction: column;
+  background: linear-gradient(135deg, #1a120c 0%, #0c0a08 100%);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 2px solid var(--ember);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+}
+#topbar.on {
+  display: flex;
+}
+#prog-wrap {
+  height: 5px;                      /* mais grossa */
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+#prog {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--gold), var(--ember-l), var(--gold));
+  background-size: 200% 100%;
+  transition: width 0.4s var(--ease-in);
+  box-shadow: 0 0 12px var(--gold);
+}
+#bar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.8rem;
+  gap: 1.5rem;
+  position: relative;                /* para referência do absolute */
+}
+#mission-lbl {
+  font-family: var(--fs);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: absolute;                /* centraliza independentemente do contador */
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;               /* evita quebra de linha */
+}
+#mission-lbl::before {
+  content: "🎯";
+  font-size: 1.3rem;
+  filter: drop-shadow(0 0 4px var(--gold));
+  animation: softPulse 2s infinite;
+}
+#mission-cnt {
+  font-size: 0.9rem;
+  font-weight: 700;
+  background: rgba(255,255,255,0.1);
+  padding: 0.3rem 1rem;
+  border-radius: 40px;
+  border: 1px solid rgba(232,152,10,0.3);
+  color: var(--gold);
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+  backdrop-filter: blur(4px);
+  margin-left: auto;                 /* força alinhamento à direita */
+}
+@keyframes softPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.08); }
+}
+@media (max-width: 480px) {
+  #mission-lbl {
+    font-size: 0.8rem;
+    white-space: normal;            /* permite quebra se necessário */
+    text-align: center;
+    width: 70%;
+  }
+  #mission-cnt {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+  }
+}
+/* Efeito de destaque quando a missão muda (adicionado via JS) */
+#topbar.highlight-mission {
+  animation: missionGlow 0.8s ease-out;
+}
+@keyframes missionGlow {
+  0% { box-shadow: 0 0 0 0 rgba(212,80,26,0.7); }
+  50% { box-shadow: 0 8px 30px rgba(232,152,10,0.5); }
+  100% { box-shadow: 0 4px 20px rgba(0,0,0,0.25); }
+}
+
+/* Responsivo: em telas pequenas reduz um pouco */
+@media (max-width: 600px) {
+  #bar-row {
+    padding: 0.7rem 1rem;
+  }
+  #mission-lbl {
+    font-size: 0.85rem;
+  }
+  #mission-lbl::before {
+    font-size: 1.1rem;
+  }
+  #mission-cnt {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.8rem;
+  }
+}
+
+/* ── NEON TARGET (MISSÃO ATUAL) ─────────── */
+@keyframes neonPulse {
+  0% { box-shadow: 0 0 0 0 rgba(212,80,26, 0.6); }
+  70% { box-shadow: 0 0 0 12px rgba(212,80,26, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(212,80,26, 0); }
+}
+.mission-target {
+  animation: neonPulse 1.5s infinite;
+  position: relative;
+  border-radius: var(--r);
+  z-index: 10;
+  outline: 2px solid var(--ember);
+  outline-offset: 4px;
+}
+/* Adaptação para blocos arredondados */
+.tl-sum.mission-target { border-radius: 99px; outline-offset: 2px; }
+
+/* ── LAYOUT ─────────────────────────────── */
+main{max-width:1040px;margin:0 auto;padding:90px 1.5rem 80px}
+section{margin-bottom:84px}
+
+/* Reveal */
+.rv{opacity:0;transform:translateY(32px);transition:opacity .7s var(--ease-in),transform .7s var(--ease-in)}
+.rv.in{opacity:1;transform:none}
+.rv[data-d="1"]{transition-delay:.1s}
+.rv[data-d="2"]{transition-delay:.2s}
+.rv[data-d="3"]{transition-delay:.3s}
+
+/* ── EYEBROW + SECTION TITLES ─────────────── */
+.eyebrow{
+  font-family:var(--fhand);font-size:2rem;
+  color:var(--ember);display:block;margin-bottom:.3rem;
+}
+.sec-h{
+  font-family:var(--fh);font-weight:700;
+  font-size:clamp(2rem,3.5vw,2.3rem);
+  color:var(--ink);line-height:1.15;margin-bottom:.5rem;
+}
+.sec-sub{
+  color:var(--muted);font-size:.98rem;
+  line-height:1.75;max-width:450px;
+}
+
+/* ── CABEÇALHO DA SEÇÃO COM AVISO À DIREITA ── */
+.sec-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.sec-header-text {
+  flex: 1;
+}
+
+/* Ajusta o aviso para ficar inline */
+.aviso-cronograma--inline {
+  margin-top: 0;
+  max-width: 450px;
+  flex-shrink: 0;
+  align-self: center;
+  background: rgba(232, 152, 10, 0.08);
+  border: 1px solid rgba(232, 152, 10, 0.25);
+  font-size: 0.8rem;
+  border-radius: 10px;
+}
+
+/* Responsivo: em telas menores, empilha */
+@media (max-width: 600px) {
+  .sec-header-row {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .aviso-cronograma--inline {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+/* ── HERO ───────────────────────────────── */
+/* ── HERO (VERSÃO REFINADA) ───────────────── */
+#sec-intro {
+  background: var(--ink);
+  border-radius: 24px;
+  overflow: hidden;
+  position: relative;
+  padding: clamp(3.5rem, 8vw, 6rem) clamp(2rem, 6vw, 5rem);
+  min-height: 520px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-shadow: 0 20px 40px -12px rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.03);
+}
+
+.hero-glow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: 
+    radial-gradient(ellipse 70% 40% at 80% 10%, rgba(232,152,10,0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 5% 90%, rgba(212,80,26,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(255,255,255,0.02) 0%, transparent 70%);
+}
+
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+#greeting-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(21,122,86,0.12);
+  border: 1px solid rgba(52,201,145,0.3);
+  border-radius: 40px;
+  padding: 0.45rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #34c991;
+  width: fit-content;
+  margin-bottom: 2rem;
+  position: relative;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  animation: chipIn 0.5s var(--ease) both;
+}
+
+.hero-h {
+  font-family: var(--fh);
+  font-weight: 900;
+  font-size: clamp(3rem, 8vw, 5.5rem);
+  line-height: 1.05;
+  color: #fff;
+  margin-bottom: 1.5rem;
+  position: relative;
+  letter-spacing: -0.01em;
+  text-align: center;
+}
+
+.hero-h .accent {
+  color: var(--ember-l);
+  font-style: italic;
+}
+
+/* Destaque especial para "total zero" */
+.hero-h .total-zero {
+  background: linear-gradient(135deg, #FFD700, #FF8C00);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 900;
+  text-shadow: 0 0 20px rgba(255,215,0,0.5);
+  position: relative;
+  display: inline-block;
+}
+
+.hero-h .total-zero::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #FFD700, #FF8C00);
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.8s 0.4s var(--ease-in);
+  box-shadow: 0 0 12px #FFD700;
+}
+
+.in .hero-h .total-zero::after {
+  transform: scaleX(1);
+}
+
+.hero-p {
+  color: #b8b0a6;
+  font-size: 1.1rem;
+  line-height: 1.7;
+  max-width: 580px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 2.5rem;
+  text-align: center;
+  position: relative;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  width: fit-content;      /* garante que a largura seja apenas o necessário */
+}
+
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2.5rem;
+  flex-wrap: wrap;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 2rem;
+  margin-top: 1rem;
+  width: 100%;                /* garante ocupação total */
+  text-align: center;         /* fallback para itens inline */
+}
+
+.hero-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;        /* centraliza conteúdo interno */
+  min-width: 100px;           /* largura mínima para consistência */
+}
+
+.stat-val {
+  font-family: var(--fh);
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.stat-val sup {
+  font-size: 1.2rem;
+  opacity: 0.7;
+  margin-left: 2px;
+  font-weight: 400;
+}
+
+.stat-lbl {
+  font-size: 0.85rem;
+  color: #8a8278;
+  margin-top: 0.4rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-div {
+  width: 1px;
+  height: 40px;               /* altura fixa para não depender do conteúdo */
+  background: rgba(255,255,255,0.1);
+  align-self: center;
+  margin: 0 0.5rem;
+}
+
+/* Responsivo */
+@media (max-width: 600px) {
+  #sec-intro {
+    padding: 2.5rem 1.5rem;
+    min-height: auto;
+    border-radius: 20px;
+  }
+  .hero-stats {
+    gap: 1.5rem;
+  }
+  .stat-val {
+    font-size: 2rem;
+  }
+}
+
+/* ── ROLETA VERTICAL DE PALAVRAS ── */
+.rotating-word-container {
+  display: inline-block;
+  vertical-align: middle;
+  height: 1.3em;
+  position: relative;
+  /* Largura fixa baseada na palavra mais longa (ex: "profissional") */
+  width: 5.5em;                /* ajuste fino conforme a fonte */
+  text-align: center;            /* alinhamento interno para não dançar */
+}
+
+.rotating-word {
+  display: block;
+  width: 100%;
+  font-family: var(--fh);
+  font-weight: 900;
+  font-style: italic;
+  background: linear-gradient(135deg, #ff6b35, #ffb347);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  
+  /* Efeito Neon aprimorado */
+  text-shadow: 
+    0 0 8px rgba(255,255,255,0.1),
+    0 0 16px currentColor,
+    0 0 32px currentColor,
+    0 0 48px rgba(255,255,255,0.2);
+  
+  filter: drop-shadow(0 0 8px rgba(255,255,255,0.5));
+  
+  white-space: nowrap;
+  animation-duration: 3.0s;
+  animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1.1);
+  animation-fill-mode: forwards;
+  
+  /* Melhorias de renderização */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Animação de entrada (caindo de cima para o meio) */
+@keyframes rotateInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-60%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animação de saída (caindo do meio para baixo) */
+@keyframes rotateOutDown {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(60%);
+  }
+}
+
+.rotating-word.in {
+  animation-name: rotateInDown;
+}
+
+.rotating-word.out {
+  animation-name: rotateOutDown;
+}
+
+/* Ajustes para o gradiente não sumir no WebKit */
+.rotating-word {
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+@media (max-width: 600px) {
+  .rotating-word-container {
+    height: 1.1em;
+    top: 0.1em;
+  }
+}
+
+#greeting-chip{
+  display:none;
+  align-items:center;gap:.5rem;
+  background:rgba(21,122,86,.14);
+  border:1px solid rgba(21,122,86,.3);
+  border-radius:99px;padding:.4rem 1rem;
+  font-size:1.1rem;font-weight:500;
+  color:#34c991;width:fit-content;margin-bottom:1.5rem;
+  position:relative;
+  animation:chipIn .5s var(--ease) both;
+}
+@keyframes chipIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+#greeting-chip.show{display:flex}
+.hero-stats{
+  display:flex;gap:2.5rem;
+  flex-wrap:wrap;position:relative;
+  border-top:1px solid rgba(255,255,255,.06);
+  padding-top:1.8rem;margin-top:.4rem;
+}
+.stat-val{
+  font-family:var(--fh);
+  font-size:2.7rem;font-weight:700;
+  color:#ffdd7e;line-height:1;
+}
+.stat-val sup{font-size:1rem;opacity:.6;margin-left:1px}
+.stat-lbl{font-size:.78rem;color:#9b9285;margin-top:1rem;font-weight:500}
+.stat-div{width:1px;background:rgba(255,255,255,.07);align-self:stretch}
+
+/* ── FLUXO ──────────────────────────────── */
+.fluxo-wrap{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:0;
+  background:var(--border-l);
+  border:1px solid var(--border);
+  border-radius:14px;overflow:hidden;
+  margin-top:2.2rem;
+}
+.f-item{
+  background:var(--paper);
+  padding:1.6rem 1.4rem;
+  transition:background .2s;
+  position:relative;
+}
+.f-item::after{
+  content:'';
+  position:absolute;bottom:0;right:0;
+  width:1px;height:calc(100% - 24px);
+  background:var(--border-l);
+}
+.f-item:hover{background:var(--warm)}
+.f-ico{font-size:1.5rem;margin-bottom:.8rem;display:block;line-height:1}
+.f-time{
+  font-size:.7rem;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ember);margin-bottom:.4rem;
+}
+.f-item h4{
+  font-family:var(--fs);font-size:.9rem;
+  font-weight:700;margin-bottom:.35rem;
+  color:var(--ink);
+}
+.f-item p{font-size:.82rem;color:var(--muted);line-height:1.5}
+
+/* ── SEPARATOR ──────────────────────────── */
+.sep{
+  height:1px;background:var(--border-l);
+  margin:80px 0;position:relative;
+}
+.sep::before{
+  content:'✦';
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  background:var(--paper);
+  padding:0 1rem;
+  color:var(--border);
+  font-size:.9rem;
+}
+
+/* ── AVISO CRONOGRAMA ───────────────────── */
+.aviso-cronograma {
+  display: flex; align-items: flex-start; gap: 0.8rem;
+  background: rgba(232, 152, 10, 0.1);
+  border: 1px solid rgba(232, 152, 10, 0.3);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  color: var(--ink);
+  font-size: 0.85rem;
+  margin-top: 1.5rem;
+  line-height: 1.5;
+}
+.aviso-cronograma svg {
+  flex-shrink: 0;
+  color: var(--gold);
+  margin-top: 2px;
+}
+
+/* ── TIMELINE ───────────────────────────── */
+.timeline{
+  position:relative;
+  margin-top:2.8rem;
+}
+.timeline::before{
+  content:'';position:absolute;
+  left:21px;top:0;bottom:0;width:1.5px;
+  background:var(--border-l);
+}
+
+.blk-head{
+  display:flex;align-items:center;
+  gap:1rem;margin:2.8rem 0 1.2rem;
+}
+.blk-line{flex:1;height:1px;background:var(--border-l)}
+.blk-tag{
+  font-family:var(--fh);font-size:1.1rem;
+  font-weight:800;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted);
+  white-space:nowrap;
+  background:var(--paper);padding:0 .5rem;
+}
+
+.tl-block{margin-bottom:1rem}
+.tl-sum{
+  display:flex;align-items:flex-start;
+  gap:1.1rem;
+  padding:.1rem 0;
+  user-select:none;
+}
+.tl-node{
+  width:44px;height:44px;flex-shrink:0;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fh);font-weight:800;font-size:1.5rem;
+  border:1.25px solid var(--border);
+  background:var(--paper);color:var(--muted);
+  transition:all .35s;
+  position:relative;z-index:1;
+}
+.tl-block.open .tl-node{
+  background:var(--ember);
+  border-color:var(--ember);
+  color:#fff;
+  box-shadow:0 0 0 5px rgba(212,80,26,.12);
+}
+.tl-hdr{flex:1;padding-top:.1rem}
+.pill{
+  display:inline-block;
+  font-size:.68rem;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+  border-radius:99px;padding:.2rem .65rem;
+  margin-bottom:.35rem;
+}
+.p-html{background:#fce8df;color:#b03a15}
+.p-css{background:#dbeafe;color:#1a45a0}
+.p-ia{background:#ede9fe;color:#4c1d95}
+.p-proj{background:#d1fae5;color:#065f3a}
+.p-pub{background:#fef3c7;color:#7c3d06}
+.tl-title{
+  font-family:var(--fs);font-weight:700;
+  font-size:1rem;color:var(--ink);
+  line-height:1.25;margin-bottom:.2rem;
+}
+.tl-date{font-size:.78rem;color:var(--muted)}
+.tl-arr{
+  margin-left:auto;font-size:.75rem;
+  color:var(--muted);padding-top:.45rem;
+  transition:transform .35s var(--ease-in),color .2s;
+  flex-shrink:0;
+}
+.tl-block.open .tl-arr{transform:rotate(180deg);color:var(--ember)}
+.tl-body{
+  margin-left:55px;
+  display:grid;
+  grid-template-rows:0fr;
+  transition:grid-template-rows .4s var(--ease-in);
+  opacity:0;transition:grid-template-rows .4s var(--ease-in),opacity .3s;
+}
+.tl-body-inner{overflow:hidden}
+.tl-block.open .tl-body{
+  grid-template-rows:1fr;
+  opacity:1;
+}
+.tl-card{
+  background:var(--warm);
+  border:1px solid var(--border-l);
+  border-radius:var(--r);
+  padding:1.5rem;
+  margin-top:.9rem;
+  margin-bottom:.4rem;
+}
+.tl-obj{
+  font-size:.88rem;color:var(--muted);
+  line-height:1.7;margin-bottom:1.2rem;
+  font-style:italic;
+  border-left:2px solid var(--border);
+  padding-left:.9rem;
+}
+.moments{display:flex;flex-direction:column;gap:.55rem;margin-bottom:1.2rem}
+.moment{
+  display:flex;align-items:flex-start;gap:.75rem;
+  background:#fff;border-radius:8px;
+  border:1px solid var(--border-l);
+  padding:.8rem 1rem;font-size:.85rem;line-height:1.55;
+  transition:border-color .2s,transform .2s;
+}
+.moment:hover{border-color:var(--border);transform:translateX(2px)}
+.m-time{
+  font-size:.68rem;font-weight:700;
+  letter-spacing:.04em;color:var(--ember);
+  min-width:58px;padding-top:1px;white-space:nowrap;
+}
+.moment strong{font-weight:600;color:var(--ink)}
+.moment span{color:var(--muted)}
+.ch-card{
+  background:#fff;border-radius:8px;
+  border-left:3px solid var(--gold);
+  padding:.9rem 1rem;font-size:.86rem;
+  border:1px solid var(--border-l);
+  border-left:3px solid var(--gold);
+}
+.ch-lbl{
+  font-family:var(--fs);font-size:.68rem;
+  font-weight:700;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--gold);
+  margin-bottom:.4rem;
+}
+.ch-card p{color:var(--muted);line-height:1.65}
+.ch-card strong{color:var(--ink)}
+.gk-card{
+  background:#fff;border-radius:8px;
+  border:1px solid var(--border-l);
+  border-left:3px solid var(--sky);
+  padding:.9rem 1rem;font-size:.86rem;
+  margin-top:.7rem;
+}
+.gk-lbl{
+  font-family:var(--fs);font-size:.68rem;
+  font-weight:700;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--sky);
+  margin-bottom:.4rem;
+}
+.gk-card p{color:var(--muted);line-height:1.65}
+
+/* ── PROJETOS ───────────────────────────── */
+.proj-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:1.2rem;margin-top:2.2rem;
+}
+.proj-card{
+  border:1.5px solid var(--border);
+  border-radius:14px;padding:2rem 1.8rem;
+  background:#fff;
+  cursor: pointer;
+  transition:transform .25s,box-shadow .25s,border-color .25s;
+  position:relative;overflow:hidden;
+}
+.proj-card::before{
+  content:'';
+  position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 0%,rgba(212,80,26,.06),transparent 70%);
+  opacity:0;transition:opacity .3s;
+}
+.proj-card:hover{
+  transform:translateY(-5px);
+  box-shadow:0 20px 40px -12px rgba(0,0,0,.1);
+  border-color:transparent;
+}
+.proj-card:hover::before{opacity:1}
+.proj-card.sel{
+  border-color:var(--ember);
+  box-shadow:0 0 0 4px rgba(212,80,26,.1);
+}
+.proj-check{
+  position:absolute;top:1rem;right:1rem;
+  width:26px;height:26px;
+  background:var(--ember);color:#f5ffeb;
+  border-radius:50%;
+  display:none;align-items:center;justify-content:center;
+  font-size:.8rem;font-weight:800;
+}
+.proj-card.sel .proj-check{display:flex}
+.proj-ico{font-size:2.2rem;margin-bottom:1rem;display:block}
+.proj-card h3{
+  font-family:var(--fs);font-weight:700;
+  font-size:1rem;margin-bottom:.5rem;
+}
+.proj-card p{font-size:.86rem;color:var(--muted);line-height:1.65}
+.proj-tag{
+  display:inline-block;margin-top:.9rem;
+  font-size:.68rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.05em;
+  border-radius:99px;padding:.25rem .7rem;
+}
+
+/* ── DICAS & ESTRATÉGIAS ────────────────── */
+.mission-pending {
+  outline: 3px solid var(--gold);
+  outline-offset: 8px;
+  transition: outline 0.2s;
+  animation: pendingPulse 1.5s infinite;
+}
+@keyframes pendingPulse {
+  0% { outline-color: var(--gold); }
+  50% { outline-color: var(--ember-l); }
+  100% { outline-color: var(--gold); }
+}
+
+.dicas-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+  gap:1.2rem;margin-top:2.2rem;
+}
+.dica-card{
+  background:#fff;border:1px solid var(--border-l);
+  border-radius:var(--r);padding:1.4rem;
+  position:relative;overflow:hidden;
+}
+.dica-card::before{
+  content:'';position:absolute;
+  top:0;left:0;right:0;height:2px;
+  background:var(--ember);transform:scaleX(0);transform-origin:left;
+  transition:transform .35s;
+}
+.dica-card:hover::before{transform:scaleX(1)}
+.dica-ico{font-size:1.35rem;margin-bottom:.8rem;display:block}
+.dica-card h4{
+  font-family:var(--fs);font-size:.9rem;
+  font-weight:700;margin-bottom:.4rem;
+}
+.dica-card p{font-size:.83rem;color:var(--muted);line-height:1.6}
+
+/* ── CTA ────────────────────────────────── */
+.cta-wrap{
+  background:var(--ink);border-radius:20px;
+  padding:clamp(3rem,6vw,5rem) clamp(2rem,5vw,4rem);
+  text-align:center;position:relative;overflow:hidden;
+}
+.cta-glow{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 50% at 50% 110%,rgba(212,80,26,.28),transparent 65%);
+  pointer-events:none;
+}
+.cta-wrap h2{
+  font-family:var(--fh);font-weight:700;
+  font-size:clamp(1.9rem,4vw,2.8rem);
+  color:#fff;margin-bottom:1rem;position:relative;
+  font-style:italic;
+}
+.cta-wrap p{
+  color:#8a8278;font-size:.98rem;
+  line-height:1.75;margin-bottom:.5rem;
+  max-width:460px;margin-left:auto;margin-right:auto;
+  position:relative;
+}
+.cta-hand{
+  font-family:var(--fhand);font-size:1.35rem;
+  color:var(--gold);position:relative;margin-bottom:2rem;display:block;
+}
+#btn-conclude{
+  display:inline-flex;align-items:center;gap:.6rem;
+  background:var(--ember);color:#fff;
+  border:none;border-radius:var(--r);
+  font-family:var(--fs);font-weight:700;
+  font-size:.98rem;letter-spacing:.05em;
+  padding:15px 32px;
+  transition:background .2s,transform .15s,box-shadow .2s;
+  width:auto;position:relative;
+}
+#btn-conclude:hover{
+  background:var(--ember-l);
+  transform:translateY(-2px);
+  box-shadow:0 10px 28px -6px rgba(212,80,26,.55);
+}
+
+/* ── CERT MODAL (Com 3D) ────────────────── */
+#cert-modal{
+  position:fixed;inset:0;z-index:9500;
+  background:rgba(12,10,8,.93);
+  backdrop-filter:blur(14px);
+  display:none;align-items:center;
+  justify-content:center;flex-direction:column;
+  gap:1.5rem;padding:1.5rem;
+  perspective: 1200px; /* Para o efeito 3D */
+}
+#cert-modal.show{display:flex}
+.cert-wrap{
+  max-width:800px;width:100%;
+  background:var(--paper);
+  border-radius:4px;
+  position:relative;
+  animation:rise .5s var(--ease) both;
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 0.1s ease-out; /* Suavidade no mousemove */
+}
+.cert-wrap.reset-3d {
+  transform: none !important;
+  transition: none !important;
+}
+.cert-mat{padding:22px; pointer-events: none;}
+.cert-inner{
+  border:2px solid var(--ink);
+  padding:clamp(2.5rem,4vw,4rem);
+  text-align:center;position:relative;
+}
+.cert-corner{
+  position:absolute;width:22px;height:22px;
+  border-style:solid;border-color:var(--ember);
+}
+.cert-corner.tl{top:-1px;left:-1px;border-width:3px 0 0 3px}
+.cert-corner.tr{top:-1px;right:-1px;border-width:3px 3px 0 0}
+.cert-corner.bl{bottom:-1px;left:-1px;border-width:0 0 3px 3px}
+.cert-corner.br{bottom:-1px;right:-1px;border-width:0 3px 3px 0}
+.cert-badge{
+  display:inline-flex;align-items:center;gap:.4rem;
+  background:rgba(212,80,26,.08);
+  border:1px solid rgba(212,80,26,.2);
+  border-radius:99px;padding:.3rem .85rem;
+  font-size:.72rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.07em;
+  color:var(--ember);margin-bottom:1.3rem;
+}
+.cert-wrap h2{
+  font-family:var(--fs);font-size:.85rem;
+  font-weight:500;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.14em;
+  margin-bottom:.3rem;
+}
+#cert-name{
+  font-family:var(--fh);font-style:italic;
+  font-size:clamp(2rem,5vw,3.2rem);
+  font-weight:700;color:var(--ember);
+  margin-bottom:1.3rem;display:block;
+}
+.cert-desc{
+  font-size:.9rem;color:var(--muted);
+  line-height:1.75;margin-bottom:2.2rem;
+  max-width:76%;margin-left:auto;margin-right:auto;
+}
+.cert-sig-row{
+  display:flex;justify-content:center;
+  margin-bottom:1.5rem;
+}
+.cert-sig-label {
+  font-family: var(--fs);
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: -0.2rem;
+  font-weight: 500;
+}
+.cert-sig{
+  font-family:var(--fhand);
+  font-size:2.8rem;
+  color:var(--ink);
+  font-weight:600;
+  display:inline-block;
+  line-height: 1;
+}
+.cert-acts{
+  display:flex;gap:.8rem;
+  flex-wrap:wrap;justify-content:center;
+  margin-top:1.5rem;
+  position: relative;
+  z-index: 10;
+}
+.btn-cert{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:12px 22px;border-radius:var(--r);
+  font-family:var(--fs);font-weight:700;
+  font-size:.88rem;border:none;
+  transition:all .2s;width:auto;letter-spacing:.04em;
+}
+.btn-cert-p{background:var(--ember);color:#fff}
+.btn-cert-p:hover{background:var(--ember-l);transform:translateY(-2px)}
+.btn-cert-g{
+  background:transparent;color:rgba(255,255,255,.6);
+  border:1.5px solid rgba(255,255,255,.15);
+}
+.btn-cert-g:hover{background:rgba(255,255,255,.07)}
+
+/* ── TOAST ──────────────────────────────── */
+#toast{
+  position:fixed;bottom:2rem;left:50%;
+  transform:translateX(-50%) translateY(14px);
+  background:var(--ink);color:#fff;
+  font-size:.86rem;font-weight:500;
+  padding:.72rem 1.5rem;
+  border-radius:99px;z-index:8000;
+  opacity:0;transition:opacity .3s,transform .3s;
+  border:1px solid rgba(255,255,255,.08);
+  pointer-events:none;white-space:nowrap;
+}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── TOAST DE CONFIRMAÇÃO (SCROLL MISSION) ── */
+#confirm-toast {
+  position: fixed;
+  bottom: 6rem;            /* acima do toast comum */
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(12, 10, 8, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.8rem 1.8rem;
+  border-radius: 60px;
+  z-index: 8500;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, transform 0.3s, visibility 0.3s;
+  border: 1px solid var(--gold);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+#confirm-toast.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+.confirm-icon {
+  font-size: 1.3rem;
+  animation: spinHourglass 1.5s infinite;
+}
+@keyframes spinHourglass {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(15deg); }
+  75% { transform: rotate(-15deg); }
+  100% { transform: rotate(0deg); }
+}
+@media (max-width: 600px) {
+  #confirm-toast {
+    font-size: 0.9rem;
+    padding: 0.6rem 1.2rem;
+    white-space: normal;
+    width: 90%;
+    text-align: center;
+    bottom: 5rem;
+  }
+}
+
+/* ── RESPONSIVE ─────────────────────────── */
+@media(max-width:640px){
+  .timeline::before{left:15px}
+  .tl-node{width:34px;height:34px;font-size:.78rem}
+  .tl-body{margin-left:46px}
+  .hero-stats{gap:1.5rem}
+  .cert-wrap { transform: none !important; } /* Desativa 3D no mobile */
+}
+</style>
+</head>
+<body>
+
+<div id="welcome" role="dialog" aria-modal="true" aria-labelledby="modal-h">
+  <div class="welcome-inner">
+    <span class="w-tag">✦ Bem-vindo(a) à jornada</span>
+    <h2 class="w-title" id="modal-h">Pronto para criar <em>seu primeiro site</em>?</h2>
+    <p class="w-desc">Em 10 aulas você sai do zero e chega com um site real, publicado e online — sem precisar de nenhum conhecimento anterior!</p>
+    <p class="w-desc">Qual é o seu nome?</p>
+    <div class="w-field">
+      <input type="text" id="user-name" placeholder="Seu nome completo..." autocomplete="off" aria-label="Seu nome completo">
+    </div>
+    <button class="w-btn" id="btn-start">
+      Começar a jornada
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <p class="w-note">Você receberá um certificado ao concluir o tour ✦</p>
+  </div>
+</div>
+
+<div id="topbar" role="status" aria-live="polite">
+  <div id="prog-wrap"><div id="prog"></div></div>
+  <div id="bar-row">
+    <span id="mission-lbl">Carregando...</span>
+    <span id="mission-cnt"></span>
+  </div>
+</div>
+
+<main id="content">
+
+  <section id="sec-intro" class="rv">
+    <div class="hero-glow"></div>
+    <div class="hero-grid"></div>
+    <div id="greeting-chip" role="status">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="rgba(52,201,145,.3)"/><path d="M4 7l2 2 4-4" stroke="#34c991" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span id="greeting-text">Olá!</span>
+    </div>
+    <h1 class="hero-h">
+      Crie um site 
+      <span class="rotating-word-container">
+        <span class="rotating-word" id="heroRotatingWord">dos sonhos</span>
+      </span>
+      <br>do <span class="accent under">total zero</span>.
+    </h1>
+    <p class="hero-p">Um curso prático para quem nunca escreveu uma linha de código. Você sairá com um site real, publicado e com link para compartilhar.</p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="stat-val" data-count="10">0</div>
+        <div class="stat-lbl">Aulas online</div>
+      </div>
+      <div class="stat-div"></div>
+      <div class="hero-stat">
+        <div class="stat-val" data-count="30">0<sup>h</sup></div>
+        <div class="stat-lbl">Horas de conteúdo</div>
+      </div>
+      <div class="stat-div"></div>
+      <div class="hero-stat">
+        <div class="stat-val">1<sup>site</sup></div>
+        <div class="stat-lbl">Publicado ao final</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="sec-fluxo" class="rv">
+    <span class="eyebrow">Como funciona</span>
+    <h2 class="sec-h">O ritual de cada aula</h2>
+    <p class="sec-sub">Toda aula segue a mesma estrutura, pensada para fixar o conteúdo e garantir que ninguém fique para trás.</p>
+    <div class="fluxo-wrap">
+      <div class="f-item rv" data-d="1"><span class="f-ico">☕</span><div class="f-time">14:00 – 14:15</div><h4>Acolhida</h4><p>Música, café e conexão. A mente precisa entrar no modo criativo antes do código.</p></div>
+      <div class="f-item rv" data-d="1"><span class="f-ico">⚡</span><div class="f-time">14:15 – 14:35</div><h4>Aquecimento</h4><p>Um desafio rápido com o que foi visto antes. Dedos soltos, memória ativa.</p></div>
+      <div class="f-item rv" data-d="2"><span class="f-ico">🧠</span><div class="f-time">14:35 – 15:20</div><h4>Teoria ativa</h4><p>O professor codifica ao vivo, explicando cada conceito com analogias do dia a dia.</p></div>
+      <div class="f-item rv" data-d="2"><span class="f-ico">🛠️</span><div class="f-time">15:20 – 15:45</div><h4>Prática guiada</h4><p>Você repete passo a passo com apoio total da turma. Erro faz parte do processo.</p></div>
+      <div class="f-item rv" data-d="3"><span class="f-ico">⏸</span><div class="f-time">15:45 – 16:00</div><h4>Intervalo</h4><p>Obrigatório. Água, pernas esticadas e tempo para processar o que aprendeu.</p></div>
+      <div class="f-item rv" data-d="3"><span class="f-ico">🧪</span><div class="f-time">16:00 – 16:30</div><h4>Laboratório</h4><p>Mão na massa no seu próprio projeto. O professor ajuda individualmente.</p></div>
+      <div class="f-item rv" data-d="3"><span class="f-ico">🎣</span><div class="f-time">16:30 – 16:35</div><h4>O gancho</h4><p>Celebração das vitórias do dia e spoilers da próxima aula.</p></div>
+      <div class="f-item rv" data-d="3"><span class="f-ico">💬</span><div class="f-time">16:35 – 17:00</div><h4>Atividades e Dúvidas</h4><p>Considerações finais para troca de ideias, encaminhamento de atividades e dúvidas.</p></div>
+    </div>
+  </section>
+
+  <section id="sec-estrategias" class="rv">
+    <span class="eyebrow">Estratégias que fazem a diferença</span>
+    <h2 class="sec-h">Ninguém fica de fora</h2>
+    <p class="sec-sub">Pequenos detalhes que tornam o aprendizado mais humano e eficaz para quem está começando do zero.</p>
+    <div class="dicas-grid">
+      <div class="dica-card rv"><span class="dica-ico">🏆</span><h4>Líder da Turma</h4><p>Quem terminar o desafio primeiro é nomeado Ajudante Oficial do dia. Empodera quem aprendeu rápido e dá fôlego para o professor.</p></div>
+      <div class="dica-card rv"><span class="dica-ico">⏱</span><h4>Cronômetro na Tela</h4><p>Durante os desafios, um timer visível cria clima de gincana. A turma foca mais e se diverte mais.</p></div>
+      <div class="dica-card rv"><span class="dica-ico">🎙</span><h4>Compartilhamento de Tela</h4><p>Um aluno diferente a cada dia mostra como resolveu. Valoriza o esforço e cria aprendizado coletivo.</p></div>
+      <div class="dica-card rv"><span class="dica-ico">💬</span><h4>Lidando com a Frustração</h4><p>"Isso faz parte! Até os profissionais esquecem de fechar uma tag. Vamos achar o erro juntos?" — o erro normalizado vira aprendizado.</p></div>
+      <div class="dica-card rv"><span class="dica-ico">🤖</span><h4>IA como Copiloto</h4><p>A partir da Aula 7, a IA entra como ferramenta — não como muleta. Gerar código, entender código, corrigir código.</p></div>
+      <div class="dica-card rv"><span class="dica-ico">📱</span><h4>Inclusão Digital</h4><p>Quem tem só celular acompanha no CodePen. Quem não instalou o VS Code continua. A inclusão é parte do curso.</p></div>
+    </div>
+  </section>
+
+  <div class="sep"></div>
+
+  <section id="sec-cronograma" class="rv">
+  <span class="eyebrow">Semana a semana</span>
+  
+  <!-- contaíner flexível para título, subtítulo e aviso -->
+  <div class="sec-header-row">
+    <div class="sec-header-text">
+      <h2 class="sec-h">O caminho completo</h2>
+      <p class="sec-sub">Clique em cada bloco de aula para saber como, quando e o que vai acontecer. Sem surpresas. 😉</p>
+    </div>
+    
+    <div class="aviso-cronograma aviso-cronograma--inline">
+      <svg width="30" height="30" viewBox="0 0 30 30" fill="none" style="flex-shrink:0;">
+        <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div><strong>Importante:</strong> Este planner pode ser alterado sem aviso prévio para cumprir com as expectativas e exigências de aprendizagem dos alunos no decorrer do curso.</div>
+    </div>
+  </div>
+
+    <div class="timeline" id="timeline">
+
+      <div class="blk-head rv"><div class="blk-line"></div><span class="blk-tag">Bloco 1 — HTML · Aulas 1–3</span><div class="blk-line"></div></div>
+
+      <div class="tl-block rv" id="tl1">
+        <div class="tl-sum" onclick="tl('tl1')" tabindex="0" aria-expanded="false">
+          <div class="tl-node">1</div>
+          <div class="tl-hdr">
+            <span class="pill p-html">HTML</span>
+            <div class="tl-title">Desvendando a Matrix e o Primeiro Código</div>
+            <div class="tl-date">17/04 — Sexta · 14h às 17h</div>
+          </div>
+          <span class="tl-arr">▼</span>
+        </div>
+        <div class="tl-body"><div class="tl-body-inner">
+          <div class="tl-card">
+            <p class="tl-obj">Criar conexão emocional, reduzir a ansiedade tecnológica e provar que qualquer pessoa pode codar — saindo da aula com código real funcionando.</p>
+            <div class="moments">
+              <div class="moment"><span class="m-time">14:00–14:40</span><div><strong>Acolhimento e apresentação</strong><br><span>Música ambiente, apresentação humana do professor com erros e tudo. Mentimeter: como você se sente sobre programação? O que quer no seu site?</span></div></div>
+              <div class="moment"><span class="m-time">14:40–15:10</span><div><strong>Contrato da turma</strong><br><span>Regras, WhatsApp, gravação. Validação do cronograma ao vivo com a turma.</span></div></div>
+              <div class="moment"><span class="m-time">15:10–15:45</span><div><strong>Teoria ativa — Analogia da casa + Atividade Hacker</strong><br><span>URL, hospedagem, HTML e CSS explicados como os cômodos de uma casa. Depois: botão direito › Inspecionar. Desafio: trocar o texto da tela pelo nome deles.</span></div></div>
+              <div class="moment"><span class="m-time">15:45–16:00</span><div><strong>Intervalo</strong><br><span>—</span></div></div>
+              <div class="moment"><span class="m-time">16:00–16:45</span><div><strong>Laboratório — O Primeiro Cartão de Visitas</strong><br><span>No CodePen: escrever &lt;h1&gt; com o próprio nome e &lt;p&gt; com uma frase. Quem terminar cola o link no chat para a turma celebrar.</span></div></div>
+              <div class="moment"><span class="m-time">16:45–17:00</span><div><strong>Fechamento</strong><br><span>Verificar quem teve problemas. Enviar tutorial de instalação do VS Code no grupo.</span></div></div>
+            </div>
+            <div class="gk-card"><div class="gk-lbl">🎣 Gancho para a próxima aula</div><p>Na segunda vamos organizar informações como um jornal — com títulos grandes e menores. Venham com uma notícia boa do fim de semana!</p></div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="tl-block rv" id="tl2">
+        <div class="tl-sum" onclick="tl('tl2')" tabindex="0" aria-expanded="false">
+          <div class="tl-node">2</div>
+          <div class="tl-hdr">
+            <span class="pill p-html">HTML</span>
+            <div class="tl-title">O Esqueleto do Site — Hierarquia e Listas</div>
+            <div class="tl-date">20/04 — Segunda · 14h às 17h</div>
+          </div>
+          <span class="tl-arr">▼</span>
+        </div>
+        <div class="tl-body"><div class="tl-body-inner">
+          <div class="tl-card">
+            <p class="tl-obj">Aprofundar o HTML ensinando hierarquia de informação, listas e estrutura semântica de uma página real.</p>
+            <div class="moments">
+              <div class="moment"><span class="m-time">14:00–14:35</span><div><strong>Retrospecto + Aquecimento</strong><br><span>Voluntário explica HTML com as próprias palavras. Desafio: "A Notícia do Dia".</span></div></div>
+              <div class="moment"><span class="m-time">14:35–15:20</span><div><strong>Teoria ativa — Hierarquia e listas</strong><br><span>Analogia do jornal: h1, h2, h3, p. Listas ul (bolinhas) vs ol (números) — como a lista de compras do mercado.</span></div></div>
+              <div class="moment"><span class="m-time">15:20–15:45</span><div><strong>Prática guiada — Currículo ou cardápio</strong><br><span>h1 com o nome, h2 "Minhas Habilidades", ul com 3 itens reais do aluno.</span></div></div>
+              <div class="moment"><span class="m-time">15:45–16:00</span><div><strong>Intervalo</strong><br><span>—</span></div></div>
+              <div class="moment"><span class="m-time">16:00–16:45</span><div><strong>Laboratório — Personalize o seu</strong><br><span>Cada aluno substitui os dados pelos próprios. Quem terminar vira Ajudante Oficial do dia.</span></div></div>
+              <div class="moment"><span class="m-time">16:45–17:00</span><div><strong>Fechamento</strong><br><span>Adicionar a notícia boa do aquecimento como nova seção — o site cresce a cada aula!</span></div></div>
+            </div>
+            <div class="ch-card"><div class="ch-lbl">⚡ Desafio — A Notícia do Dia</div><p>Crie um <strong>&lt;h1&gt;</strong> com uma notícia boa da sua semana e um <strong>&lt;p&gt;</strong> explicando por que foi legal. Objetivo: praticar escrita de tags e fechamento correto dos elementos.</p></div>
+            <div class="gk-card"><div class="gk-lbl">🎣 Gancho para a próxima aula</div><p>Quarta o site ainda é só texto. Vamos colocar imagens e links — o que faz a internet ser a internet de verdade!</p></div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="tl-block rv" id="tl3">
+        <div class="tl-sum" onclick="tl('tl3')" tabindex="0" aria-expanded="false">
+          <div class="tl-node">3</div>
+          <div class="tl-hdr">
+            <span class="pill p-html">HTML</span>
+            <div class="tl-title">Conectando o Mundo — Imagens, Links e Domínios</div>
+            <div class="tl-date">22/04 — Quarta · 14h às 17h</div>
+          </div>
+          <span class="tl-arr">▼</span>
+        </div>
+        <div class="tl-body"><div class="tl-body-inner">
+          <div class="tl-card">
+            <p class="tl-obj">Dar vida ao HTML com imagens e links, e desmistificar domínio e hospedagem de forma prática.</p>
+            <div class="moments">
+              <div class="moment"><span class="m-time">14:00–14:35</span><div><strong>Retrospecto + Aquecimento</strong><br><span>Voluntário explica ul vs ol. Desafio: reproduzir de memória uma lista ordenada.</span></div></div>
+              <div class="moment"><span class="m-time">14:35–15:20</span><div><strong>Teoria ativa — img, a e a web interligada</strong><br><span>Analogia do porta-retratos para a tag img. Tag &lt;a&gt; com href. Por que a internet é a internet: tudo conectado por links.</span></div></div>
+              <div class="moment"><span class="m-time">15:20–15:45</span><div><strong>Prática guiada</strong><br><span>Inserir imagem de algo que amam e criar link "Clique aqui para ir ao Google".</span></div></div>
+              <div class="moment"><span class="m-time">15:45–16:00</span><div><strong>Intervalo</strong><br><span>—</span></div></div>
+              <div class="moment"><span class="m-time">16:00–16:30</span><div><strong>Domínio e hospedagem explicados</strong><br><span>Domínio = placa com seu nome na porta. Hospedagem = o terreno. Diferença .com e .com.br. Opções gratuitas que usaremos.</span></div></div>
+              <div class="moment"><span class="m-time">16:30–17:00</span><div><strong>Laboratório — Mural de Favoritos</strong><br><span>2 imagens de coisas que gosta + 1 link para site ou vídeo favorito. Lista do aquecimento vai para dentro do mural.</span></div></div>
+            </div>
+            <div class="gk-card"><div class="gk-lbl">🎣 Gancho para a próxima aula</div><p>Sexta saímos do CodePen. Vamos instalar o programa que os profissionais usam — confiram o tutorial no grupo!</p></div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="blk-head rv"><div class="blk-line"></div><span class="blk-tag">Bloco 2 — CSS · Aulas 4–6</span><div class="blk-line"></div></div>
+
+      <div class="tl-block rv" id="tl4">
+        <div class="tl-sum" onclick="tl('tl4')" tabindex="0" aria-expanded="false">
+          <div class="tl-node">4</div>
+          <div class="tl-hdr">
+            <span class="pill p-css">CSS</span>
+            <div class="tl-title">Saindo do Ninho — VS Code e o Primeiro CSS</div>
+            <div class="tl-date">24/04 — Sexta · 14h às 17h</div>
+          </div>
+          <span class="tl-arr">▼</span>
+        </div>
+        <div class="tl-body"><div class="tl-body-inner">
+          <div class="tl-card">
+            <p class="tl-obj">Migrar do CodePen para o VS Code, entender a relação entre HTML e CSS e ver o primeiro estilo funcionando ao vivo.</p>
+            <div class="moments">
+              <div class="moment"><span class="m-time">14:00–14:35</span><div><strong>Retrospecto + Aquecimento</strong><br><span>O que é src? O que é href? Desafio: lista de compras só com HTML.</span></div></div>
+              <div class="moment"><span class="m-time">14:35–15:10</span><div><strong>Teoria ativa — Arquivos, pastas e a dupla HTML+CSS</strong><br><span>Analogia da mudança: o projeto sai da nuvem e vem para o computador. HTML = corpo, CSS = roupa — mesma pasta, dois arquivos.</span></div></div>
+              <div class="moment"><span class="m-time">15:10–15:45</span><div><strong>Prática guiada — Configurando o terreno</strong><br><span>Criar pasta, abrir no VS Code, arquivo index.html, digitar ! + Enter (Emmet), instalar Live Server.</span></div></div>
+              <div class="moment"><span class="m-time">15:45–16:00</span><div><strong>Intervalo</strong><br><span>—</span></div></div>
+              <div class="moment"><span class="m-time">16:00–16:45</span><div><strong>Laboratório — A Prova dos Nove</strong><br><span>Criar style.css, linkar ao HTML. Colocar background-color: red no body e ver a tela piscar no Live Server. Celebrar cada vitória!</span></div></div>
+              <div class="moment"><span class="m-time">16:45–17:00</span><div><strong>Fechamento</strong><br><span>Verificar problemas técnicos, agendar suporte no grupo.</span></div></div>
+            </div>
+            <div class="gk-card"><div class="gk-lbl">🎣 Gancho para a próxima aula</div><p>O site está branco e sem graça. Segunda escolhemos cores e fontes elegantes — a diferença de um site amador para um com personalidade.</p></div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="tl-block rv" id="tl5">
+        <div class="tl-sum" onclick="tl('tl5')" tabindex="0" aria-expanded="false">
+          <div class="tl-node">5</div>
+          <div class="tl-hdr">
+            <span class="pill p-css">CSS</span>
+            <div class="tl-title">Pincel e Tinta — Cores, Fontes e Personalidade</div>
+            <div class="tl-date">27/04 — Segunda · 14h às 17h</div>
+          </div>
+          <span class="tl-arr">▼</span>
+        </div>
+        <div class="tl-body"><div class="tl-body-inner">
+          <div class="tl-card">
+            <p class="tl-obj">Dominar a estética básica com cores, tipografia e alinhamento. O aluno sai com um site visualmente diferente e com personalidade própria.</p>
+            <div class="moments">
+              <div class="moment"><span class="m-time">14:00–14:35</span><div><strong>Retrospecto + Aquecimento — Modo Noturno</strong><br><span>Como o HTML chama o CSS? Sintaxe básica? Desafio: mudar fundo para preto e texto para amarelo.</span></div></div>
+              <div class="moment"><span class="m-time">14:35–15:20</span><div><strong>Teoria ativa — Vestindo as tags</strong><br><span>Cores (nome, hex, rgb). Google Fonts ao vivo: antes e depois de uma fonte moderna. font-size, line-height, text-align.</span></div></div>
+              <div class="moment"><span class="m-time">15:20–15:45</span><div><strong>Prática guiada</strong><br><span>Escolher fonte com votação da turma, importar ao vivo, centralizar textos.</span></div></div>
+              <div class="moment"><span class="m-time">15:45–16:00</span><div><strong>Intervalo</strong><br><span>—</span></div></div>
+              <div class="moment"><span class="m-time">16:00–16:45</span><div><strong>Laboratório — O Cartão Elegante</strong><br><span>Aplicar paleta de cores favorita + fonte elegante no site construído até agora.</span></div></div>
+              <div class="moment"><span class="m-time">16:45–17:00</span><div><strong>Fechamento</strong><br><span>Mostrar 2 ou 3 sites dos alunos na tela. Elogiar as escolhas estéticas.</span></div></div>
+            </div>
+            <div class="ch-card"><div class="ch-lbl">⚡ Desafio — Modo Noturno</div><p>Pegue o código anterior e mude o fundo para <strong>preto</strong> e a letra para <strong>amarelo</strong> usando só background-color e color. Objetivo: praticar seletores de cor sem CSS moderno.</p></div>
+            <div class="gk-card"><div class="gk-lbl">🎣 Gancho para a próxima aula</div><p>O site está bonito, mas tudo está grudado na tela. Quarta vamos aprender a caixa mágica que dá espaço para cada elemento — o conceito mais importante do CSS.</p></div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="tl-block rv" id="tl6">
+        <div class="tl-sum" onclick="tl('tl6')" tabindex="0" aria-expanded="false">
+          <div class="tl-node">6</div>
+          <div class="tl-hdr">
+            <span class="pill p-css">CSS</span>
+            <div class="tl-title">A Caixa Mágica — Box Model e Flexbox</div>
+            <div class="tl-date">29/04 — Quarta · 14h às 17h</div>
+          </div>
+          <span class="tl-arr">▼</span>
+        </div>
+        <div class="tl-body"><div class="tl-body-inner">
+          <div class="tl-card">
+            <p class="tl-obj">Compreender o Box Model e usar Flexbox para posicionar elementos lado a lado — os dois conceitos que desbloqueiam o layout moderno.</p>
+            <div class="moments">
+              <div class="moment"><span class="m-time">14:00–14:35</span><div><strong>Retrospecto + Aquecimento — O Código Quebrado</strong><br><span>Voluntário explica Google Fonts e text-align. Desafio: encontrar erros de sintaxe num CSS proposital.</span></div></div>
+              <div class="moment"><span class="m-time">14:35–15:20</span><div><strong>Teoria ativa — O quadro na parede (Box Model)</strong><br><span>Content = foto. Padding = moldura branca. Border = madeira do quadro. Margin = distância entre quadros. Ver no DevTools.</span></div></div>
+              <div class="moment"><span class="m-time">15:20–15:45</span><div><strong>Prática guiada — O botão perfeito</strong><br><span>Transformar tag &lt;a&gt; em botão com padding, background-color e border-radius. Antes e depois na tela.</span></div></div>
+              <div class="moment"><span class="m-time">15:45–16:00</span><div><strong>Intervalo</strong><br><span>—</span></div></div>
+              <div class="moment"><span class="m-time">16:00–16:45</span><div><strong>Laboratório — Galeria de Fotos com Flexbox</strong><br><span>display:flex. Colocar 3 imagens lado a lado e centralizadas. Adicionar o botão do lab anterior abaixo das imagens.</span></div></div>
+              <div class="moment"><span class="m-time">16:45–17:00</span><div><strong>Fechamento</strong><br><span>"Se entenderam Box Model + Flexbox, já entendem 60% dos sites modernos." Pedir ideias para o projeto final.</span></div></div>
+            </div>
+            <div class="ch-card"><div class="ch-lbl">⚡ Desafio — O Código Quebrado</div><p>Encontre os 2 erros: <strong>h1 &#123; color: blue font-size: 20px; &#125;</strong> — Primeiro que achar e corrigir os dois avisa no chat!</p></div>
+            <div class="gk-card"><div class="gk-lbl">🎣 Gancho para a próxima aula</div><p>Sexta entramos no bloco de IA. Vou mostrar como usar o ChatGPT e o Claude para criar e corrigir código. Venham com a ideia do projeto final!</p></div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="blk-head rv"><div class="blk-line"></div><span class="blk-tag">Bloco 3 — IA + Projeto Final · Aulas 7–9</span><div class="blk-line"></div></div>
+
+      <div class="tl-block rv" id="tl7">
+        <div class="tl-sum" onclick="tl('tl7')" tabindex="0" aria-expanded="false">
+          <div class="tl-node">7</div>
+          <div class="tl-hdr">
+            <span class="pill p-ia">IA Copiloto</span>
+            <div class="tl-title">Criando com Inteligência Artificial</div>
+            <div class="tl-date">01/05 — Sexta · 14h às 17h</div>
+          </div>
+          <span class="tl-arr">▼</span>
+        </div>
+        <div class="tl-body"><div class="tl-body-inner">
+          <div class="tl-card">
+            <p class="tl-obj">Aprender a usar IA (ChatGPT/Claude) para gerar, corrigir e entender código — uma habilidade que dura para sempre e não exige memorizar sintaxe.</p>
+            <div class="moments">
+              <div class="moment"><span class="m-time">14:00–14:35</span><div><strong>Retrospecto + Aquecimento — Dupla Dinâmica</strong><br><span>O que é Flexbox? Desafio: duas divs coloridas lado a lado sem ajuda da IA.</span></div></div>
+              <div class="moment"><span class="m-time">14:35–15:10</span><div><strong>Teoria ativa — A IA como estagiária muito estudada</strong><br><span>Você descreve, ela escreve, você revisa. Regra de ouro: nunca cole código que não entende sem perguntar o que faz.</span></div></div>
+              <div class="moment"><span class="m-time">15:10–15:45</span><div><strong>Prática guiada — Prompts para código</strong><br><span>Pedir à IA um card HTML com foto, nome e botão. Analisar o código. Pedir "explique linha por linha". Testar no VS Code.</span></div></div>
+              <div class="moment"><span class="m-time">15:45–16:00</span><div><strong>Intervalo</strong><br><span>—</span></div></div>
+              <div class="moment"><span class="m-time">16:00–16:45</span><div><strong>Laboratório — Gerou, entendeu, ajustou</strong><br><span>Cada aluno pede à IA um elemento do projeto final e faz 2 ajustes manuais no CSS.</span></div></div>
+              <div class="moment"><span class="m-time">16:45–17:00</span><div><strong>Pitch do projeto</strong><br><span>30 segundos cada: tema do projeto, para quem é, objetivo principal.</span></div></div>
+            </div>
+            <div class="ch-card"><div class="ch-lbl">⚡ Desafio — Dupla Dinâmica</div><p>Crie duas divs coloridas <strong>lado a lado</strong> usando display:flex — sem IA, só o que você já sabe. Depois verão o poder de refinar com IA.</p></div>
+            <div class="gk-card"><div class="gk-lbl">🎣 Gancho para a próxima aula</div><p>Segunda começa a construção do projeto final. Tragam um rascunho — no papel mesmo — de como querem que o site fique!</p></div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="tl-block rv" id="tl8">
+        <div class="tl-sum" onclick="tl('tl8')" tabindex="0" aria-expanded="false">
+          <div class="tl-node">8</div>
+          <div class="tl-hdr">
+            <span class="pill p-proj">Projeto</span>
+            <div class="tl-title">Fábrica de Sites I — Estrutura e Identidade Visual</div>
+            <div class="tl-date">04/05 — Segunda · 14h às 17h</div>
+          </div>
+          <span class="tl-arr">▼</span>
+        </div>
+        <div class="tl-body"><div class="tl-body-inner">
+          <div class="tl-card">
+            <p class="tl-obj">Iniciar a construção do projeto final com HTML semântico completo e identidade visual definida.</p>
+            <div class="moments">
+              <div class="moment"><span class="m-time">14:00–14:35</span><div><strong>Checklist + Aquecimento — O Anúncio</strong><br><span>Mapear onde cada aluno está. Desafio: escrever em 1 frase o objetivo do site e para quem serve — será o headline do hero.</span></div></div>
+              <div class="moment"><span class="m-time">14:35–14:50</span><div><strong>Planejamento</strong><br><span>Definir seções, paleta de cores e fonte. Wireframe rápido no papel ou com IA.</span></div></div>
+              <div class="moment"><span class="m-time">14:50–15:45</span><div><strong>Construção — HTML semântico completo</strong><br><span>header, nav, main, section (hero / sobre / serviços / contato), footer. A IA pode ajudar na estrutura base.</span></div></div>
+              <div class="moment"><span class="m-time">15:45–16:00</span><div><strong>Intervalo</strong><br><span>—</span></div></div>
+              <div class="moment"><span class="m-time">16:00–16:45</span><div><strong>Laboratório — Identidade visual no CSS</strong><br><span>Reset CSS, variáveis de cor (:root), tipografia, header fixo. A frase do aquecimento vira o h1 do hero.</span></div></div>
+              <div class="moment"><span class="m-time">16:45–17:00</span><div><strong>Fechamento</strong><br><span>Mostrar 2 projetos com permissão. "Não importa onde você está — importa o que vai fazer até a última aula."</span></div></div>
+            </div>
+            <div class="ch-card"><div class="ch-lbl">⚡ Desafio — O Anúncio</div><p>Uma frase: <strong>qual o objetivo do site e para quem serve?</strong> Essa frase vira o título principal do seu projeto real.</p></div>
+            <div class="gk-card"><div class="gk-lbl">🎣 Gancho para a próxima aula</div><p>Trabalhe no projeto em casa — até 30 minutos ajudam. Quanto mais avançado você chegar na Quarta, mais tempo teremos para polir o layout.</p></div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="tl-block rv" id="tl9">
+        <div class="tl-sum" onclick="tl('tl9')" tabindex="0" aria-expanded="false">
+          <div class="tl-node">9</div>
+          <div class="tl-hdr">
+            <span class="pill p-proj">Projeto</span>
+            <div class="tl-title">Fábrica de Sites II — Polimento e Responsividade</div>
+            <div class="tl-date">06/05 — Quarta · 14h às 17h</div>
+          </div>
+          <span class="tl-arr">▼</span>
+        </div>
+        <div class="tl-body"><div class="tl-body-inner">
+          <div class="tl-card">
+            <p class="tl-obj">Finalizar o visual, corrigir problemas de layout e garantir que o site funciona no celular.</p>
+            <div class="moments">
+              <div class="moment"><span class="m-time">14:00–14:35</span><div><strong>Checklist + Aquecimento — Caça ao Erro</strong><br><span>Mapear prioridades. Desafio: 3 erros propositais no código — quem achar os 3 primeiro ganha parabéns oficial.</span></div></div>
+              <div class="moment"><span class="m-time">14:15–15:45</span><div><strong>Laboratório aberto — polimento</strong><br><span>100% prática. Bugs, espaçamentos, cores, formulário de contato com :hover. Anjinho da Turma ajuda no chat.</span></div></div>
+              <div class="moment"><span class="m-time">15:45–16:00</span><div><strong>Intervalo</strong><br><span>—</span></div></div>
+              <div class="moment"><span class="m-time">16:00–16:35</span><div><strong>Responsividade — Teste no celular</strong><br><span>DevTools modo celular (Ctrl+Shift+M). Os 3 problemas mais comuns e como corrigi-los com @media ou IA.</span></div></div>
+              <div class="moment"><span class="m-time">16:35–17:00</span><div><strong>Caça ao erro coletiva + Fechamento</strong><br><span>Voluntário compartilha tela, turma aponta 3 problemas, consertam ao vivo. "Salve o projeto — sexta vai ao ar!"</span></div></div>
+            </div>
+            <div class="ch-card"><div class="ch-lbl">⚡ Desafio — Caça ao Erro</div><p>Código com 3 erros propositais (tag sem fechar, atributo errado, propriedade inexistente). <strong>Primeiro que achar os 3 ganha parabéns oficial da turma!</strong></p></div>
+            <div class="gk-card"><div class="gk-lbl">🎣 Gancho para a próxima aula</div><p>Sexta é o dia em que o mundo vê você. Traga o projeto salvo e venha pronto para colocar o link no ar.</p></div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="blk-head rv"><div class="blk-line"></div><span class="blk-tag">Bloco 4 — Publicação · Aula 10</span><div class="blk-line"></div></div>
+
+      <div class="tl-block rv" id="tl10">
+        <div class="tl-sum" onclick="tl('tl10')" tabindex="0" aria-expanded="false">
+          <div class="tl-node">10</div>
+          <div class="tl-hdr">
+            <span class="pill p-pub">Publicar</span>
+            <div class="tl-title">O Mundo Vê Você — Publicação e Formatura</div>
+            <div class="tl-date">08/05 — Sexta · 14h às 17h</div>
+          </div>
+          <span class="tl-arr">▼</span>
+        </div>
+        <div class="tl-body"><div class="tl-body-inner">
+          <div class="tl-card">
+            <p class="tl-obj">Publicar o site gratuitamente, apresentar no showcase, celebrar a conquista e orientar os próximos passos de cada aluno.</p>
+            <div class="moments">
+              <div class="moment"><span class="m-time">14:00–14:40</span><div><strong>Acolhimento especial + Aquecimento final</strong><br><span>Música comemorativa. Resumo da jornada com fotos da turma. Cada aluno diz a evolução em 1 frase.</span></div></div>
+              <div class="moment"><span class="m-time">14:40–15:30</span><div><strong>Deploy ao vivo — Netlify</strong><br><span>Passo a passo: criar conta, arrastar pasta, gerar link. Professor faz ao vivo enquanto a turma acompanha.</span></div></div>
+              <div class="moment"><span class="m-time">15:30–15:45</span><div><strong>Ajustes finais</strong><br><span>Quem precisar de suporte elevado de mão — turma ajuda turma.</span></div></div>
+              <div class="moment"><span class="m-time">15:45–16:00</span><div><strong>Intervalo</strong><br><span>—</span></div></div>
+              <div class="moment"><span class="m-time">16:00–16:40</span><div><strong>Showcase — Apresentação dos projetos</strong><br><span>Cada aluno compartilha o link e explica o site em 2 minutos. Turma comenta e celebra.</span></div></div>
+              <div class="moment"><span class="m-time">16:40–17:00</span><div><strong>Próximos passos + Formatura</strong><br><span>Orientações: o que estudar depois. Entrega dos certificados. Foto da turma. Festa!</span></div></div>
+            </div>
+            <div class="gk-card"><div class="gk-lbl">🏆 Conquista final</div><p>Você começa como alguém que nunca escreveu código. Você termina como alguém que tem um site publicado na internet. Essa diferença é real — e ela é sua.</p></div>
+          </div>
+        </div></div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="sep"></div>
+
+  <section id="sec-projetos" class="rv">
+    <span class="eyebrow">O que você vai construir</span>
+    <h2 class="sec-h">Escolha seu projeto final</h2>
+    <p class="sec-sub">No final da jornada você entrega um destes projetos totalmente funcional, publicado e com link real na internet.</p>
+    <div class="proj-grid">
+      <div class="proj-card" onclick="selectProj(this)" tabindex="0">
+        <div class="proj-check">✓</div>
+        <span class="proj-ico">💼</span>
+        <h3>Currículo Digital</h3>
+        <p>Destaque-se no mercado. Uma página moderna listando suas habilidades, experiências e formas de contato — ideal para enviar a recrutadores.</p>
+        <span class="proj-tag" style="background:#fce8df;color:#b03a15">Carreira</span>
+      </div>
+      <div class="proj-card" onclick="selectProj(this)" tabindex="0">
+        <div class="proj-check">✓</div>
+        <span class="proj-ico">🏪</span>
+        <h3>Vitrine de Negócio</h3>
+        <p>Para empreendedores locais. Mostre seus produtos, serviços e coloque um botão direto para o seu WhatsApp — seu negócio na internet.</p>
+        <span class="proj-tag" style="background:#d1fae5;color:#065f3a">Negócio</span>
+      </div>
+      <div class="proj-card" onclick="selectProj(this)" tabindex="0">
+        <div class="proj-check">✓</div>
+        <span class="proj-ico">📸</span>
+        <h3>Blog / Portfólio</h3>
+        <p>Um espaço para exibir suas fotos, textos, viagens ou artes, estruturado como uma galeria online elegante e pessoal.</p>
+        <span class="proj-tag" style="background:#dbeafe;color:#1a45a0">Criativo</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="sec-dicas" class="rv">
+    <span class="eyebrow">Para aproveitar ao máximo</span>
+    <h2 class="sec-h">Mentalidade dev</h2>
+    <p class="sec-sub">Quatro princípios que os melhores alunos levam para todas as aulas.</p>
+    <div class="dicas-grid">
+      <div class="dica-card rv" data-d="1"><span class="dica-ico">🐛</span><h4>Erro é dado, não falha</h4><p>Todo desenvolvedor passa 40% do tempo consertando código. Quando aparecer um bug, celebre — você está praticando a habilidade mais importante da área.</p></div>
+      <div class="dica-card rv" data-d="2"><span class="dica-ico">📓</span><h4>Anote com suas palavras</h4><p>Não copie código — escreva o que ele faz na sua linguagem. Isso que vai ficar na memória por anos.</p></div>
+      <div class="dica-card rv" data-d="2"><span class="dica-ico">⏱️</span><h4>30 minutos valem ouro</h4><p>Revise o conteúdo da aula no dia seguinte. Apenas meia hora entre aulas é suficiente para consolidar tudo.</p></div>
+      <div class="dica-card rv" data-d="3"><span class="dica-ico">🤝</span><h4>Ensinar é aprender duas vezes</h4><p>Quando você ajuda um colega a resolver um problema, você mesmo fixa o conceito muito mais fundo do que assistindo passivamente.</p></div>
+    </div>
+  </section>
+
+  <div id="sec-cta" class="rv">
+    <div class="cta-wrap">
+      <div class="cta-glow"></div>
+      <h2>Tudo lido?<br>A jornada começa de verdade.</h2>
+      <p>Você explorou cada aula, entendeu a estrutura e já sabe o que vem por aí. Agora clique e receba seu certificado de conclusão do tour.</p>
+      <span class="cta-hand">Você já é um dev em potencial ✦</span>
+      <br>
+      <button id="btn-conclude">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 1.5l2.18 4.41 4.82.7-3.5 3.41.83 4.81L9 12.77l-4.33 2.06.83-4.81L2 6.61l4.82-.7L9 1.5z" fill="currentColor"/></svg>
+        Concluir tour e receber certificado
+      </button>
+    </div>
+  </div>
+
+  <div style="height:60px"></div>
+</main>
+
+<div id="cert-modal" role="dialog" aria-modal="true">
+  <div class="cert-wrap" id="cert-dom">
+    <div class="cert-mat">
+      <div class="cert-inner">
+        <div class="cert-corner tl"></div>
+        <div class="cert-corner tr"></div>
+        <div class="cert-corner bl"></div>
+        <div class="cert-corner br"></div>
+        <div class="cert-badge">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.54 3.12 3.46.5-2.5 2.44.59 3.44L6 8.9 2.91 10.5l.59-3.44L1 4.62l3.46-.5L6 1z" fill="currentColor"/></svg>
+          Certificado de Conclusão
+        </div>
+        <h2>Certificamos que</h2>
+        <span id="cert-name">[Nome]</span>
+        <p class="cert-desc">Concluiu com dedicação e interesse o tour dinâmico e interativo de planejamento do curso <b>Criação de Sites do Zero</b>, demonstrando comprometimento real com cada etapa da jornada. O poder do código agora está em suas mãos — é hora de construir o futuro da internet.</p>
+        <div class="cert-sig-row">
+          
+          <div style="text-align: center;">
+             <div class="cert-sig-label">de seu instrutor:</div>
+             <div class="cert-sig">Pedro Silva</div>
+          </div>
+        </div>
+        <!-- QR Codes -->
+        <div class="cert-qrcodes" style="display: flex; justify-content: center; gap: 24px; margin-top: 24px; text-align: center; border-top: 1px dashed var(--border-l); padding-top: 20px;">
+          <div class="qr-dinamico">
+            <p style="font-size: 11px; margin-bottom: 6px; color: var(--muted);">Validação da jornada</p>
+            <img id="qr-validacao" src="" alt="QR Code de validação" width="90" height="90" style="border: 1px solid var(--border); border-radius: 8px; padding: 4px; background: #fff;">
+          </div>
+          <div class="qr-estatico">
+            <p style="font-size: 11px; margin-bottom: 6px; color: var(--muted);">Acesse o Github do curso</p>
+            <!-- Substitua 'tr-ee-DWZ-qrcode-black.png' pelo caminho real da sua imagem -->
+            <img src="tr-ee-DWZ-qrcode-black.png" alt="QR Code do site" width="90" height="90" style="border: 1px solid var(--border); border-radius: 8px; padding: 4px; background: #fff;">
+          </div>
+        </div>        
+      </div>
+    </div>
+  </div>
+  <div class="cert-acts">
+    <button class="btn-cert btn-cert-p" id="btn-dl">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1v9m0 0L4 6.5M7.5 10l3.5-3.5M2 13h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Baixar certificado
+    </button>
+    <button class="btn-cert btn-cert-g" id="btn-close-cert">Fechar</button>
+  </div>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- Toast de confirmação de missão scroll -->
+<div id="confirm-toast" role="status" aria-live="polite">
+  <span class="confirm-icon">⏳</span>
+  <span id="confirm-text">Confirmando missão em 5s...</span>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+
+/* ── 3D CERTIFICATE EFFECT ───── */
+const certWrap = document.getElementById('cert-dom');
+certWrap.addEventListener('mousemove', (e) => {
+  const rect = certWrap.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  const centerX = rect.width / 2;
+  const centerY = rect.height / 2;
+  const rotateX = ((y - centerY) / centerY) * -6; // max 6 deg
+  const rotateY = ((x - centerX) / centerX) * 6;
+  
+  certWrap.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+});
+certWrap.addEventListener('mouseleave', () => {
+  certWrap.style.transform = `rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+});
+
+/* ── TOUR STATE ──────────────── */
+let step = 0, name = '';
+let scrollMissionTimer = null;
+let currentScrollMissionElement = null;
+
+function checkInitialScrollMission() {
+  if (step >= tasks.length) return;
+  const currentTask = tasks[step];
+  if (currentTask.type !== 'scroll') return;
+  
+  const el = document.getElementById(currentTask.id);
+  if (!el) return;
+  
+  const rect = el.getBoundingClientRect();
+  const winHeight = window.innerHeight;
+  const visiblePart = Math.min(rect.bottom, winHeight) - Math.max(rect.top, 0);
+  const elementHeight = rect.height;
+  const visibleRatio = visiblePart / elementHeight;
+  
+  if (visibleRatio >= 0.35) {
+    startScrollMissionTimer(el, step);
+  }
+}
+
+/* ── FUNÇÕES AUXILIARES (TIMERS) ───────────── */
+function clearScrollMissionTimer() {
+  if (scrollMissionTimer) {
+    clearTimeout(scrollMissionTimer);
+    scrollMissionTimer = null;
+  }
+  if (currentScrollMissionElement) {
+    currentScrollMissionElement.classList.remove('mission-pending');
+    currentScrollMissionElement = null;
+  }
+  // Esconde o toast de confirmação
+  const confirmToast = document.getElementById('confirm-toast');
+  if (confirmToast) {
+    confirmToast.classList.remove('show');
+  }
+}
+
+// Inicia o timer para completar a missão scroll
+function startScrollMissionTimer(element, missionStep) {
+  clearScrollMissionTimer(); // limpa timer anterior e esconde toast
+  
+  currentScrollMissionElement = element;
+  element.classList.add('mission-pending');
+  
+  const confirmToast = document.getElementById('confirm-toast');
+  const confirmText = document.getElementById('confirm-text');
+  let countdown = 15;
+  
+  // Mostra o toast
+  confirmToast.classList.add('show');
+  
+  const updateCountdown = () => {
+    if (countdown > 0) {
+      confirmText.textContent = `Confirmando missão em ${countdown}s...`;
+      countdown--;
+      scrollMissionTimer = setTimeout(updateCountdown, 1000);
+    } else {
+      // Missão concluída
+      if (step === missionStep) {
+        step++;
+        updateStep();
+        showToast('✦ Missão concluída!');
+      }
+      clearScrollMissionTimer(); // esconde o toast e limpa
+    }
+  };
+  
+  scrollMissionTimer = setTimeout(updateCountdown, 1000);
+}
+
+const tasks = [
+  { txt: 'Leia a introdução', id: 'sec-intro', type: 'scroll' },
+  { txt: 'Conheça o ritual diário', id: 'sec-fluxo', type: 'scroll' },
+  { txt: 'Estratégias do Professor', id: 'sec-estrategias', type: 'scroll' },
+  { txt: 'Chegue no cronograma', id: 'sec-cronograma', type: 'scroll' },
+  { txt: 'Abra a Aula 1 (HTML)', id: 'tl1', type: 'click' },
+  { txt: 'Abra a Aula 2 (HTML)', id: 'tl2', type: 'click' },
+  { txt: 'Abra a Aula 3 (HTML)', id: 'tl3', type: 'click' },
+  { txt: 'Abra a Aula 4 (CSS)', id: 'tl4', type: 'click' },
+  { txt: 'Abra a Aula 5 (CSS)', id: 'tl5', type: 'click' },
+  { txt: 'Abra a Aula 6 (CSS)', id: 'tl6', type: 'click' },
+  { txt: 'Abra a Aula 7 (IA)', id: 'tl7', type: 'click' },
+  { txt: 'Abra a Aula 8 (Projeto)', id: 'tl8', type: 'click' },
+  { txt: 'Abra a Aula 9 (Projeto)', id: 'tl9', type: 'click' },
+  { txt: 'Abra a Aula 10 (Publicação)', id: 'tl10', type: 'click' },
+  { txt: 'Explore os projetos finais', id: 'sec-projetos', type: 'scroll' },
+  { txt: 'Final — Chegue ao CTA e conclua!', id: 'sec-cta', type: 'scroll' }
+];
+
+/* ── MODAL ───────────────────── */
+const welcomeEl=document.getElementById('welcome');
+const inputEl=document.getElementById('user-name');
+document.getElementById('btn-start').addEventListener('click',start);
+inputEl.addEventListener('keydown',e=>{if(e.key==='Enter')start()});
+/* ── CONFETES LEVES (DOM) ─────────────────── */
+function lightConfetti(options = {}) {
+  const count = options.particleCount || 30;
+  const colors = options.colors || ['#d4501a', '#e8980a', '#157a56', '#1a3a5c'];
+  const originX = options.origin?.x ?? 0.5;
+  const originY = options.origin?.y ?? 0.5;
+  const spread = options.spread || 60;
+  const duration = options.duration || 5000; // 8 segundos padrão
+
+  for (let i = 0; i < count; i++) {
+    const confete = document.createElement('div');
+    confete.style.position = 'fixed';
+    confete.style.width = '12px';
+    confete.style.height = '12px';
+    confete.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    confete.style.left = (originX * 100) + 'vw';
+    confete.style.top = (originY * 100) + 'vh';
+    confete.style.opacity = Math.random() * 0.8 + 0.2;
+    confete.style.zIndex = '9999';
+    confete.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    confete.style.pointerEvents = 'none';
+    confete.style.willChange = 'transform, opacity';
+    
+    document.body.appendChild(confete);
+
+    // Parâmetros da trajetória
+    const angle = (Math.random() - 0.5) * spread;
+    const rad = angle * (Math.PI / 180);
+    const horizontalDistance = 60 + Math.random() * 150; // vw
+    const dx = Math.sin(rad) * horizontalDistance;
+    
+    // Altura do pico (negativa para subir)
+    const peakHeight = -15 - Math.random() * 20; // vh
+    // Posição final (queda)
+    const finalY = 40 + Math.random() * 30; // vh
+    
+    // Rotação
+    const rotateStart = Math.random() * 360;
+    const rotateEnd = rotateStart + (Math.random() * 720 + 360);
+    
+    // Nome único da animação
+    const animName = `confettiArc_${Date.now()}_${i}`;
+    
+    // Keyframes simplificados: apenas pontos essenciais
+    const keyframes = `
+      @keyframes ${animName} {
+        0% {
+          transform: translate(0vw, 0vh) rotate(${rotateStart}deg);
+          opacity: ${confete.style.opacity};
+        }
+        40% {
+          transform: translate(${dx * 0.5}vw, ${peakHeight}vh) rotate(${rotateStart + (rotateEnd - rotateStart) * 0.4}deg);
+          opacity: 1;
+        }
+        100% {
+          transform: translate(${dx * 1.2}vw, ${finalY}vh) rotate(${rotateEnd}deg);
+          opacity: 0;
+        }
+      }
+    `;
+    
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = keyframes;
+    document.head.appendChild(styleSheet);
+    
+    confete.style.animation = `${animName} ${duration}ms linear forwards`;
+    
+    const cleanup = () => {
+      if (confete.parentNode) confete.remove();
+      if (styleSheet.parentNode) styleSheet.remove();
+    };
+    
+    confete.addEventListener('animationend', cleanup, { once: true });
+    setTimeout(() => {
+      confete.removeEventListener('animationend', cleanup);
+      cleanup();
+    }, duration + 500);
+  }
+}
+
+/* Fogos de artifício leves (várias rajadas) */
+function fireworksLeve() {
+  const end = Date.now() + 3000;
+  const colors = ['#d4501a', '#e8980a', '#faf8f3', '#1a3a5c'];
+  (function frame() {
+    const left = end - Date.now();
+    if (left <= 0) return;
+    const count = Math.floor(20 * (left / 3000));
+    lightConfetti({ particleCount: count, spread: 60, origin: { x: 0.2, y: 0.5 }, colors });
+    lightConfetti({ particleCount: count, spread: 60, origin: { x: 0.8, y: 0.5 }, colors });
+    lightConfetti({ particleCount: count * 0.5, spread: 90, origin: { x: 0.5, y: 0.4 }, colors });
+    setTimeout(frame, 150);
+  })();
+}
+  
+function start(){
+  console.log('✅ start() iniciado');
+  const v = inputEl.value.trim();
+  if (!v) { shake(inputEl); return; }
+  name = v;
+  console.log('Nome:', name);
+  document.getElementById('greeting-text').textContent = `Bem-vindo à jornada ${name}! 🎉`;
+  document.getElementById('greeting-chip').classList.add('show');
+  document.getElementById('cert-name').textContent = name;
+  welcomeEl.classList.add('hidden');
+  document.getElementById('topbar').classList.add('on');
+  
+  console.log('Chamando updateStep()...');
+  updateStep();
+  console.log('updateStep() concluído');
+  
+  animateCounters();
+  lightConfetti({ particleCount: 40, spread: 65, origin: { x: 0.5, y: 0.65 }, colors: ['#d4501a','#e8980a','#f3ede0'] });
+  
+  initReveal();
+
+  setTimeout(() => {
+    console.log('⏰ Timeout 200ms - chamando checkInitialScrollMission()');
+    checkInitialScrollMission();
+  }, 200);
+}
+
+function shake(el){
+  el.style.animation='shake .4s ease';
+  el.addEventListener('animationend',()=>el.style.animation='',{once:true});
+}
+
+/* ── Atualiza QR Code de validação ── */
+function atualizarQRValidacao(nomeAluno) {
+  const qrImg = document.getElementById('qr-validacao');
+  const data = encodeURIComponent(`Certificado de conclusão do tour "Jornada Dev" emitido para ${nomeAluno} em ${new Date().toLocaleDateString('pt-BR')}`);
+  qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${data}`;
+}
+
+/* ── ATUALIZAÇÃO DE MISSÃO ─────────────────── */
+function updateStep(){
+  clearScrollMissionTimer(); // <-- agora definida
+  
+  document.querySelectorAll('.mission-target').forEach(el => el.classList.remove('mission-target'));
+  
+  if(step >= tasks.length) { finish(); return; }
+  const t = tasks[step];
+  
+  const targetEl = document.getElementById(t.id);
+  if(targetEl) {
+    if(t.type === 'click') {
+      const sumEl = targetEl.querySelector('.tl-sum');
+      if(sumEl) sumEl.classList.add('mission-target');
+    } else {
+      targetEl.classList.add('mission-target');
+    }
+  }
+
+  document.getElementById('mission-lbl').textContent = t.txt;
+  document.getElementById('mission-cnt').textContent = `${step+1} / ${tasks.length}`;
+  document.getElementById('prog').style.width = `${(step/tasks.length)*100}%`;
+  
+  // Efeito de destaque na barra
+  const topbar = document.getElementById('topbar');
+  topbar.classList.remove('highlight-mission');
+  void topbar.offsetWidth;
+  topbar.classList.add('highlight-mission');
+}
+
+/* ── SCROLL OBSERVER (agora após todas as funções) ── */
+const scrollIO = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (step >= tasks.length) return;
+    const currentTask = tasks[step];
+    if (currentTask.type !== 'scroll') return;
+    if (entry.target.id !== currentTask.id) return;
+    
+    if (entry.isIntersecting) {
+      startScrollMissionTimer(entry.target, step);
+    } else {
+      clearScrollMissionTimer();
+    }
+  });
+}, { threshold: 0.35 });
+
+tasks.filter(t => t.type === 'scroll').forEach(t => {
+  const el = document.getElementById(t.id);
+  if (el) scrollIO.observe(el);
+});
+
+/* ── TIMELINE ────────────────── */
+function tl(id){
+  const blk=document.getElementById(id);
+  const isOpen=blk.classList.contains('open');
+  blk.classList.toggle('open',!isOpen);
+  const sumEl=blk.querySelector('.tl-sum');
+  sumEl.setAttribute('aria-expanded',String(!isOpen));
+  
+  // (auto-scroll)
+  if (!isOpen) {  // só quando está ABRINDO
+    setTimeout(() => {
+      sumEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 400); // duração igual à transição CSS de grid-template-rows (0.4s)
+  }
+  
+  if(!isOpen&&step<tasks.length){
+    const t=tasks[step];
+    if(t.type==='click'&&t.id===id){
+      clearScrollMissionTimer();
+      step++;updateStep();
+      showToast('✦ Missão concluída!');
+    }
+  }
+}
+document.querySelectorAll('.tl-sum').forEach(s=>{
+  s.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tl(s.closest('.tl-block').id)}});
+});
+
+/* ── PROJECT SELECTOR ────────── */
+function selectProj(card){
+  document.querySelectorAll('.proj-card').forEach(c=>c.classList.remove('sel'));
+  card.classList.add('sel');
+  showToast(`Projeto escolhido: ${card.querySelector('h3').textContent}`);
+}
+document.querySelectorAll('.proj-card').forEach(c=>{
+  c.addEventListener('keydown',e=>{if(e.key==='Enter')selectProj(c)});
+});
+
+/* ── CONCLUDE ────────────────── */
+document.getElementById('btn-conclude').addEventListener('click',()=>{
+  if(step<tasks.length){
+    showToast('⚡ Complete todas as missões antes!');
+    return;
+  }
+  finish();
+});
+
+function finish(){
+  clearScrollMissionTimer()
+  document.querySelectorAll('.mission-target').forEach(el => el.classList.remove('mission-target'));
+  document.getElementById('prog').style.width='100%';
+  document.getElementById('mission-lbl').textContent='JORNADA CONCLUÍDA! 🏆';
+  document.getElementById('mission-cnt').textContent='';
+  fireworksLeve();
+  atualizarQRValidacao(name);
+  setTimeout(()=>{
+    document.getElementById('cert-modal').classList.add('show');
+  },1400);
+}
+
+/* ── CERTIFICATE DOWNLOAD ────── */
+document.getElementById('btn-dl').addEventListener('click',async()=>{
+  const btn=document.getElementById('btn-dl');
+  const certDom=document.getElementById('cert-dom');
+  
+  btn.textContent='Gerando...';
+  btn.disabled=true;
+  
+  // Pausa o 3D temporariamente para o canvas capturar perfeitamente
+  certDom.classList.add('reset-3d');
+  
+  // Aguarda um pequeno delay para a transição do CSS aplicar o reset
+  await new Promise(r => setTimeout(r, 150));
+
+  try{
+    const canvas=await html2canvas(certDom,{
+      scale:2,backgroundColor:'#faf8f3',useCORS:true,logging:false
+    });
+    const a=document.createElement('a');
+    a.download=`Certificado_${name.replace(/\s+/g,'_')}.png`;
+    a.href=canvas.toDataURL('image/png');
+    a.click();
+    showToast('✦ Certificado salvo!');
+  }catch(e){showToast('Erro ao gerar imagem')}
+  
+  // Retorna o botão ao normal e devolve o 3D
+  certDom.classList.remove('reset-3d');
+  btn.innerHTML='<svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1v9m0 0L4 6.5M7.5 10l3.5-3.5M2 13h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Baixar certificado';
+  btn.disabled=false;
+});
+document.getElementById('btn-close-cert').addEventListener('click',()=>{
+  document.getElementById('cert-modal').classList.remove('show');
+});
+
+/* ── REVEAL (Intersection Observer) */
+let revealIO = null;
+
+function initReveal() {
+  if (revealIO) return; // já iniciado
+  revealIO = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        revealIO.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.rv').forEach(el => revealIO.observe(el));
+}
+
+/* ── COUNTER ANIMATION ────────── */
+function animateCounters(){
+  document.querySelectorAll('[data-count]').forEach(el=>{
+    const target=+el.dataset.count;
+    let cur=0;
+    const step=Math.ceil(target/24);
+    const t=setInterval(()=>{
+      cur=Math.min(cur+step,target);
+      el.firstChild.textContent=cur;
+      if(cur>=target)clearInterval(t);
+    },55);
+  });
+}
+
+/* ── TOAST ────────────────────── */
+let toastT;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('on');
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>t.classList.remove('on'),2600);
+}
+
+/* ── SHAKE KEYFRAME ──────────── */
+const sty=document.createElement('style');
+sty.textContent=`
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+`;
+document.head.appendChild(sty);
+/* ── ROLETA DE PALAVRAS NO HERO ── */
+(function() {
+  const words = [
+   { text: 'dos sonhos', color1: '#FFB347', color2: '#FFD700' }, // laranja suave → dourado brilhante
+    { text: 'bonito',     color1: '#FF6B9D', color2: '#FFA07A' }, // rosa claro → salmão claro
+    { text: 'profissional', color1: '#4FC3F7', color2: '#81D4FA' }, // azul claro → azul bebê
+    { text: 'incrível',   color1: '#9B51E0', color2: '#BB6BD9' }, // roxo → lavanda (mantido)
+    { text: 'moderno',    color1: '#F2994A', color2: '#F2C94C' }, // laranja queimado → amarelo (mantido)
+    { text: 'responsivo', color1: '#66D9EF', color2: '#A6E3E9' }, // ciano claro → água
+    { text: 'elegante',   color1: '#FF8A80', color2: '#FFB74D' }, // coral claro → laranja suave
+    { text: 'único',      color1: '#81C784', color2: '#AED581' }  // verde claro → verde menta
+];
+  
+  const wordElement = document.getElementById('heroRotatingWord');
+  let currentIndex = 0;
+  let intervalId = null;
+  
+  function rotateWord() {
+    // Aplica saída (out) na palavra atual
+    wordElement.classList.add('out');
+    wordElement.classList.remove('in');
+    
+    // Após a animação de saída, troca o texto e aplica entrada
+    setTimeout(() => {
+      // Próximo índice
+      currentIndex = (currentIndex + 1) % words.length;
+      const nextWord = words[currentIndex];
+      
+      // Atualiza texto e gradiente
+      wordElement.textContent = nextWord.text;
+      wordElement.style.background = `linear-gradient(135deg, ${nextWord.color1}, ${nextWord.color2})`;
+      wordElement.style.webkitBackgroundClip = 'text';
+      wordElement.style.backgroundClip = 'text';
+      wordElement.style.color = 'transparent';
+      
+      // Aplica entrada
+      wordElement.classList.remove('out');
+      wordElement.classList.add('in');
+    }, 300); // metade da duração da animação para sincronizar
+  }
+  
+  // Inicia a rotação a cada 3 segundos
+  function startRotation() {
+    if (intervalId) clearInterval(intervalId);
+    intervalId = setInterval(rotateWord, 3000);
+  }
+  
+  // Para a rotação quando a página não está visível (opcional)
+  function handleVisibilityChange() {
+    if (document.hidden) {
+      if (intervalId) clearInterval(intervalId);
+      intervalId = null;
+    } else {
+      startRotation();
+    }
+  }
+  
+  // Inicializa
+  wordElement.classList.add('in');
+  startRotation();
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+})();
+</script>
+</body>
+</html>
